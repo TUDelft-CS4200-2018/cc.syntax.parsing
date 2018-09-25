@@ -1,0 +1,7 @@
+algorithm
+
+  Void A() {
+    for(each A = a in G) {
+      ...
+    }
+  }

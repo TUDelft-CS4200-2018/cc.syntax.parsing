@@ -1,0 +1,4 @@
+algorithm
+
+  Symbol* FIRST(a) {
+  }

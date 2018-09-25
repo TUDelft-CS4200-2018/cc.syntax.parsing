@@ -1,0 +1,9 @@
+grammar
+  start S
+  non-terminals S T E
+  terminals ID "+" 
+  productions
+    S = E $
+    E = T "+" E
+    E = T
+    T = ID

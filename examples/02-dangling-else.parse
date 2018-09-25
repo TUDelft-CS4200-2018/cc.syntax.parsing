@@ -1,0 +1,60 @@
+grammar // 4.14
+  sorts S E
+  productions
+    S.If  = if E then S
+    S.IfE = if E then S else S
+    S     = other
+   
+derivation
+  S =>* if E1 then S1 else if E2 then S2 else S3
+
+term derivation
+  S =>* IfE(E1, S1, IfE(E2, S2, S3))
+  
+term derivation
+  S
+  => IfE(E1, S1, S)
+  => IfE(E1, S1, IfE(E2, S2, S3))
+    
+    
+// language is ambiguous
+
+derivation
+  S =>* if E1 then if E2 then S1 else S2 
+
+term derivation
+  S 
+  => If(E1, S)
+  => If(E1, IfE(E2, S1, S2))
+  
+derivation
+  S
+  => if E1 then S
+  => if E1 then if E2 then S1 else S2
+
+term derivation
+  S
+  => IfE(E1, S, S2) 
+  => IfE(E1, If(E2, S1), S2)
+  
+derivation
+  S
+  => if E1 then S else S2
+  => if E1 then if E2 then S1 else S2 
+  
+// disambiguating dangling else
+
+grammar
+  sorts S E
+  productions
+    S  = MS
+    S  = OS
+    MS = if E then MS else MS
+    MS = other
+    OS = if E then S
+    OS = if E then MS else OS
+    
+// 'contextual grammar'
+
+
+    

@@ -1,0 +1,96 @@
+// Shift-Reduce Parsing
+
+// machine
+
+shift-reduce parse
+  $ stack | input $ accept
+  
+shift-reduce parse
+     $ a   | l w $ shift 
+  => $ a l |   w $ shift
+  
+  // shift input symbol on the stack
+
+shift-reduce parse
+     $ a b | w $ reduce by A = b 
+  => $ a A | w $ shift
+  
+  // reduce n symbols of the stack to symbol A
+
+shift-reduce parse
+  $ S | $ accept
+  
+  // reduced to start symbol; accept
+  
+shift-reduce parse
+  $ a | w $ error 
+  
+  // no action possible in this state
+  
+// example
+  
+grammar // 4.1
+  sorts E T F ID
+  productions
+    E.P = E "+" T 
+    E.E = T
+    T.M = T "*" F 
+    T.T = F
+    F.B = "(" E ")"  
+    F.V = ID
+     
+shift-reduce parse
+     $          | ID "*" ID $ shift
+  => $ ID       |    "*" ID $ reduce by F = ID
+  => $ F        |    "*" ID $ reduce by T = F
+  => $ T        |    "*" ID $ shift
+  => $ T "*"    |        ID $ shift
+  => $ T "*" ID |           $ reduce by F = ID
+  => $ T "*" F  |           $ reduce by T = T "*" F
+  => $ T        |           $ reduce by E = T
+  => $ E        |           $ accept
+  
+
+
+// Shift-Reduce Conflicts
+
+grammar // 4.14
+  sorts S E
+  productions
+    S.If  = if E then S
+    S.IfE = if E then S else S
+    S     = other
+
+shift-reduce parse 
+      $                    | if E then S else S $ shift 
+  =>  $ if                 |    E then S else S $ shift 
+  =>* $ if E then S        |             else S $ shift 
+  =>  $ if E then S else   |                  S $ shift 
+  =>  $ if E then S else S |                    $ reduce by S = if E then S else S 
+  =>  $ S                  |                    $ shift 
+  
+shift-reduce parse 
+      $                    | if E then S else S $ shift 
+  =>  $ if                 |    E then S else S $ shift 
+  =>* $ if E then S        |             else S $ reduce by S = if E then S 
+  =>  $ S                  |             else S $ error 
+  
+  
+  
+shift-reduce parse 
+      $                              | if E then if E then S else S $ ... 
+  =>* $ if E then if E then S        |                       else S $ shift 
+  =>  $ if E then if E then S else   |                            S $ shift 
+  =>  $ if E then if E then S else S |                              $ reduce by S = if E then S else S  
+  =>  $ if E then S                  |                              $ reduce by S = if E then S 
+  =>  $ S                            |                              $ accept
+
+shift-reduce parse 
+      $                              | if E then if E then S else S $ ... 
+  =>* $ if E then if E then S        |                       else S $ reduce by S = if E then S 
+  =>  $ if E then S                  |                       else S $ shift   
+  =>  $ if E then S else             |                            S $ shift  
+  =>  $ if E then S else S           |                              $ reduce by S = if E then S else S 
+  =>  $ S                            |                              $ accept   
+  
+  

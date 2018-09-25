@@ -1,0 +1,33 @@
+// left factoring
+
+grammar 
+  sorts S E
+  productions
+    S.If  = if E then S
+    S.IfE = if E then S else S
+    S     = other
+    
+grammar 
+  sorts S E
+  productions
+    S.If      = if E then S S'
+    S'.Else   = else S
+    S'.NoElse = // empty
+    S         = other
+
+// in general: factor out common prefix
+
+grammar
+  sorts
+  productions
+    A = a b1
+    A = a b2
+    A = c 
+    
+grammar
+  sorts
+  productions
+    A  = a A'
+    A' = b1
+    A' = b2
+    A  = c

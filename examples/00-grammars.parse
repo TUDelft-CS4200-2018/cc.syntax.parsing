@@ -1,0 +1,82 @@
+grammar // 4.1
+  start S
+  non-terminals E T F
+  terminals "+" "*" "(" ")" ID
+  productions
+    S = E
+    E = E "+" T 
+    E = T
+    T = T "*" F 
+    T = F
+    F = "(" E ")"  
+    F = ID
+ 
+grammar // 4.1
+  productions
+    E = E "+" T 
+    E = T
+    T = T "*" F 
+    T = F
+    F = "(" E ")"  
+    F = ID
+    
+grammar // 4.2
+  sorts E T E' F T'
+  productions 
+    E  = T E'
+    E' = "+" T E'
+    E' = 
+    T  = F T'
+    T' = "*" F T'
+    T' = 
+    F  = "(" E ")"
+    F  = ID
+    
+grammar // 4.3
+  sorts E ID
+  productions
+    E = E "+" E
+    E = E "*" E
+    E = "(" E ")"
+    E = ID
+    
+    
+grammar // 4.6
+  sorts E T F ID
+  productions
+    E = E "+" T 
+    E = E "-" T
+    E = T
+    T = T "*" F 
+    T = T "/" F
+    T = F
+    F = "(" E ")"  
+    F = ID
+    
+    
+grammar // 4.7
+  sorts E ID
+  productions
+    E = E "+" E
+    E = E "*" E
+    E = "-" E
+    E = "(" E ")"
+    E = ID
+    
+derivation 
+  E 
+  => "_" E
+  => "_" "(" E ")"
+  => "_" "(" E "+" E ")"
+  => "_" "(" ID "+" E ")"
+  => "_" "(" ID "+" ID ")"
+  
+  
+      
+derivation
+  E 
+  => E "+" E
+  => E "*" E "+" E
+  => I "*" E "+" E
+  
+  

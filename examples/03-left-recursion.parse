@@ -1,0 +1,51 @@
+// the following grammar is left-recursive
+
+grammar // left recursive
+  productions
+    E = E "+" T 
+    E = T
+    T = T "*" F 
+    T = F
+    F = "(" E ")"  
+    F = ID
+    
+// eliminating left recursion:
+
+grammar // b followed by a list of as
+  sorts
+  productions 
+    A = A a
+    A = b
+    
+grammar
+  sorts
+  productions 
+    A  = b A'
+    A' = a A'
+    A' = // empty
+    
+// applied to arithmetic expression grammar 
+
+grammar 
+  sorts E T E' F T'
+  productions 
+    E  = T E'
+    E' = "+" T E'
+    E' = 
+    T  = F T'
+    T' = "*" F T'
+    T' = 
+    F  = "(" E ")"
+    F  = ID
+    
+// homework: generalize to 
+
+grammar
+  sorts
+  productions 
+    A = A a1
+    A = A a2
+    A = A a3
+    A = b1
+    A = b2
+    A = b3

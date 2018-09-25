@@ -1,0 +1,290 @@
+module parsing
+
+imports Common
+
+context-free start-symbols Start
+
+context-free syntax
+  
+  Start.Development = Elem*
+  
+  Elem = Grammar
+  Elem = Derivation
+  Elem = Reduction
+  Elem = Parse
+  Elem = Algorithm
+  Elem = LRTable
+  
+context-free syntax // grammars  
+
+  Grammar.Grammar = <
+    grammar
+      <Start?>
+      <Sorts?>
+      <Terminals?>
+      <Productions>
+      <Priorities?>
+  >
+  
+context-free syntax
+
+  Start.Start = <
+    start <ID>
+  >
+  
+  Sorts.Sorts = <
+    sorts <ID*>
+  >
+  
+  Sorts.NonTerminals = <
+    non-terminals <ID*>
+  >
+  
+  Terminals.Terminals = <
+    terminals <Symbol*>
+  >
+  
+  Productions.Productions = <
+    productions
+      <Production*>
+  >
+  
+  Priorities.Priorities = <
+    priorities
+      <{PrioGroup ">"}*>
+  >
+
+context-free syntax
+  
+  Production.Prod = <
+    <Symbol><Constructor?> = <Symbol*> <Assoc?>
+  >
+
+  Symbol.NT  = <<ID>>
+  Symbol.T   = <<STRING>>
+  Symbol.L   = <<LCID>>
+  Symbol.EOF = <$>
+  
+  Constructor.Con = <.<ID>>
+  
+  Assoc.Left     = <{ left }>
+  Assoc.Right    = <{ right }>
+  Assoc.NonAssoc = <{ non-assoc }>
+  
+  ProdRef.ProdRef = <<Symbol><Constructor>>
+  
+  PrioGroup.Single = <<ProdRef>>
+  PrioGroup.Group  = <{<ProdRef*>}>
+  PrioGroup.LGroup = <{ left : <ProdRef*>}>
+  PrioGroup.RGroup = <{ right : <ProdRef*>}>
+  
+context-free syntax // derivations 
+
+  Derivation.Derivation = <
+    derivation
+      <Symbol> <Step*>
+  >
+  
+  Step.Step   = [=> [Symbol*]]
+  Step.Steps  = [=>* [Symbol*]]  
+  Step.Steps1 = [=>+ [Symbol*]]
+  
+context-free syntax // tree derivations
+
+  Derivation.TreeDerivation = <
+    tree derivation
+      <Symbol> <PStep*>
+  >
+  
+  PStep.Step   = [=> [PT*]]  
+  PStep.Steps  = [=>* [PT*]]  
+  PStep.Steps1 = [=>+ [PT*]]
+  
+  PT.App = <<Symbol>[<PT*>]>
+  PT.Str = <<STRING>>
+  PT.Sym = <<Symbol>>
+  
+context-free syntax // term derivations
+
+  Derivation.TermDerivation = <
+    term derivation
+      <Symbol> <TStep*>
+  >
+  
+  TStep.Step   = [=> [Term*]] 
+  TStep.Steps  = [=>* [Term*]]  
+  TStep.Steps1 = [=>+ [Term*]]
+  
+  Term.App = <<ID>(<{Term ","}*>)>
+  Term.Str = <<STRING>>
+  Term.Sym = <<Symbol>>
+  
+context-free syntax // reductions 
+
+  Reduction.Reduction = <
+    reduction
+      <Symbol*> <RStep*>
+  >
+  
+  RStep.Step = [<= [Symbol*]] 
+  RStep.Steps = [<=* [Symbol*]]  
+  RStep.Steps1 = [<=+ [Symbol*]]
+  
+context-free syntax // tree reductions
+
+  Reduction.TreeReduction = <
+    tree reduction
+      <PT*> <PRStep*>
+  >
+  
+  PRStep.Step   = [<= [PT*]]  
+  PRStep.Steps  = [<=* [PT*]]  
+  PRStep.Steps1 = [<=+ [PT*]]
+  
+context-free syntax // term reductions
+
+  Reduction.TermReduction = <
+    term reduction
+      <Term*> <TRStep*>
+  >
+  
+  TRStep.Step   = [<= [Term*]]  
+  TRStep.Steps  = [<=* [Term*]]  
+  TRStep.Steps1 = [<=+ [Term*]]
+  
+context-free syntax // shift-reduce parsing
+
+  Parse.ShiftReduceParse = <
+    shift-reduce parse
+      <SRState> <SRStep*>
+  >
+  
+  SRStep.Step  = [=> [SRState]]
+  SRStep.Steps = [=>* [SRState]]
+  
+  SRState.SRState = <
+    $ <Symbol*> | <Symbol*> $ <Action>
+  >
+  
+  Action.Shift  = <shift>
+  Action.Reduce = <reduce by <Production>>
+  Action.Accept = <accept>
+  Action.Error  = <error>
+  Action.Other  = <...>
+  
+context-free syntax // items
+
+  Item.Item = <[<Symbol> = <Symbol*> . <Symbol*>]>
+  
+  ItemSet.ItemSet = <{<Item*>}>
+  
+context-free syntax // shift-reduce item parsing
+
+  Parse.ShiftReduceItemParse = <
+    shift-reduce item parse
+      <SRIState> <SRIStep*>
+  >
+  
+  SRIStep.Step  = [=> [SRIState]]
+  SRIStep.Steps = [=>* [SRIState]]
+  
+  SRIState.SRIState = <
+    $ <StackNode*> | <Symbol*> $ <LRAction>
+  >
+  
+  StackNode.StackNode = <<INT?><ItemSet>>
+  StackNode.StackNodeN = <<INT>>
+  
+context-free syntax // item table 
+
+  LRTable.LRTable = <
+    LR table 
+      <State*>
+  >
+  
+  State.State = <
+    state <INT> 
+      <ItemSet> 
+      <LRAction*>
+  >
+
+  LRAction.Shift  = <shift <Symbol> to <INT>>
+  LRAction.Reduce = <reduce <Production>>
+  LRAction.Accept = <accept>
+  LRAction.Error  = <error>
+
+context-free syntax
+
+  Algorithm.Algo = <
+    algorithm
+    
+      <Procedure*>
+  >
+  
+  Procedure.Procedure = <
+    <ID> <ID>(<{ID ","}*>) {
+      <Statement*>
+    }
+  >
+  
+  Statement.Assign = <<ID> := <Exp>;>
+  
+  Statement.Return = <
+    return <Exp>;
+  >
+  
+  Statement.Repeat = <
+    repeat 
+      <Statement>
+    until <Exp>;
+  >
+  
+  Statement.For = <
+    for ( each <Exp> in <Exp> )
+      <Statement>
+  >
+  
+  Statement.if = <
+    if ( <Exp> ) 
+      <Statement>
+  >
+  
+  Statement.Block = <
+    {
+      <{Statement "\n"}*>     
+    }
+  >
+  
+  Statement.Exp = <<Exp>;>
+  
+  Exp.Var = <<ID>>
+  Exp.NotIn = <<Exp> is not in <Exp>>
+  Exp.Call = <<ID>(<{Exp ","}*>)>
+  
+  Exp.And = <<Exp> and <Exp>> {left}
+  
+//  Exp.MixCall = <<Phrase+>>
+//  Phrase.Phrase = <<LCID> <Exp>>
+  
+  Exp.Item = <<Item>>
+  Exp.Production = <[<Production>]>
+  Exp.ItemSet = <<ItemSet>>
+  
+  Exp.Set = <{<{Exp ","}*>}>
+  
+  Exp = <(<Exp>)> {bracket}
+  
+context-free syntax
+
+  LCID = "derivation" {reject}
+  LCID = "reduction" {reject}
+  LCID = "grammar" {reject}
+  LCID = "tree" {reject}
+  LCID = "term" {reject}
+  LCID = "algorithm" {reject}
+  
+template options
+
+  ID = keyword {reject}
+  LCID = keyword {reject}  
+  

@@ -1,0 +1,77 @@
+// From Derivation to Reduction
+
+// a reduction is an inverse derivation
+
+// start with an sentence, reduce it to (starting) symbol by applying productions as reduction rules
+
+grammar
+  sorts A 
+  productions
+    A = b
+    
+reduction
+  a b c <= a A c
+
+// example
+
+grammar // 4.1
+  sorts E T F ID
+  productions
+    E.P = E "+" T 
+    E.E = T
+    T.M = T "*" F 
+    T.T = F
+    F.B = "(" E ")"  
+    F.V = ID
+    
+reduction
+  ID "*" ID
+  <= F "*" ID
+  <= T "*" ID
+  <= T "*" F
+  <= T
+  <= E
+  
+tree reduction
+  ID "*" ID
+  <= F[ID] "*" ID
+  <= T[F[ID]] "*" ID
+  <= T[F[ID]] "*" F[ID]
+  <= T[T[F[ID]] "*" F[ID]]
+  <= E[T[T[F[ID]] "*" F[ID]]]
+  
+term reduction
+  ID "*" ID
+  <= V(ID) "*" ID
+  <= T(V(ID)) "*" ID
+  <= T(V(ID)) "*" V(ID)
+  <= M(T(V(ID)), V(ID))
+  <= E(M(T(V(ID)), V(ID)))
+  
+  
+// Handle
+
+// sentential form: string of non-terminal and terminal symbols that can be derived from start symbol
+
+// S =>* a 
+
+// right sentential form: a sentential form derived by a right-most derivation
+
+// handle: the part of a right sentential form that if reduced 
+// would produced the previous right-sential form in a right-most derivation
+ 
+grammar
+  productions
+    A = b
+    
+derivation // right-most derivation
+  S =>* a A w =>  a b w 
+    
+reduction
+  a b w <= a A w <=* S
+  
+
+
+
+  
+  

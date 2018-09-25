@@ -1,0 +1,178 @@
+// Items and Item sets
+
+LR table
+  state 0 {
+    [A = . X Y Z]
+    [A = X . Y Z]
+    [A = X Y . Z]
+    [A = X Y Z .]
+  }
+  state 1 {
+    [E = . E "+" T]
+    [E = E . "+" T]
+    [E = E "+" . T]
+    [E = E "+" T .]
+  }  
+  state 4  
+{
+  [F = "(" . E ")"]  
+  [E = . E "+" T] 
+  [E = . T]
+  [T = . T "*" F] 
+  [T = . F]
+  [F = . "(" E ")"]  
+  [F = . ID]
+} 
+
+
+algorithm
+
+SetOfItems Closure(I) {
+  J := I;
+  repeat 
+    for(each [A = a . B b] in J) 
+      for(each [B = c] in G)
+        if([B = . c] is not in J)
+          J := Add([B = .c], J);
+  until Not(Changed(J));
+  return J;
+}
+
+grammar // 4.1
+  sorts S E T F ID
+  productions
+    S = E
+    E = E "+" T 
+    E = T
+    T = T "*" F 
+    T = F
+    F = "(" E ")"  
+    F = ID 
+  
+LR table 
+state 0 {
+    [S = . E] 
+    [E = . E "+" T] 
+    [E = . T] 
+    [T = . T "*" F] 
+    [T = . F] 
+    [F = . "(" E ")"]  
+    [F = . ID] 
+  } 
+  shift E to 1
+  shift T to 2
+  shift F to 3
+  shift "(" to 4
+  shift ID to 5
+state 1 {
+    [S = E . ]
+    [E = E . "+" T]
+  } 
+  accept
+  shift "+" to 6 
+state 2 {
+    [E = T . ]
+    [T = T . "*" F] 
+  } 
+  reduce E = T
+  shift "*" to 7
+state 3 {
+    [T = F . ]
+  }
+  reduce T = F
+state 4  {
+    [F = "(" . E ")"]  
+    [E = . E "+" T] 
+    [E = . T]
+    [T = . T "*" F] 
+    [T = . F]
+    [F = . "(" E ")"]  
+    [F = . ID]
+  } 
+  shift E to 8
+  shift T to 2
+  shift F to 3
+  shift "(" to 4
+  shift ID to 5
+state 5 {
+    [F = ID .]
+  }
+  reduce F = ID
+state 6 {
+    [E = E "+" . T]
+    [T = . T "*" F] 
+    [T = . F]
+    [F = . "(" E ")"]  
+    [F = . ID]
+  } 
+  shift T to 9
+  shift F to 3
+  shift "(" to 4
+  shift ID to 5
+state 7 {
+    [T = T "*" . F]
+    [F = . ID]
+  }
+  shift F to 10
+  shift ID to 5
+state 8 {
+    [F = "(" E . ")"] 
+  }
+  shift ")" to 11
+state 9 {
+    [E = E "+" T .]
+    [T = T . "*" F]
+  } 
+  reduce E = E "+" T
+  shift "*" to 7
+state 10 {
+    [T = T "*" F .] 
+  }
+  reduce T = T "*" F
+state 11 {
+    [F = "(" E ")" .] 
+  }
+  reduce F = "(" E ")"
+  
+
+
+
+
+shift-reduce item parse   
+     $ 0{[S = . E]}                    | ID "*" ID $ shift ID to 5
+  => $ 0 5{[F = ID .]}                 |    "*" ID $ reduce F = ID
+  => $ 0                               |    "*" ID $ shift F to 3
+  => $ 0 3{[T = F .]}                  |    "*" ID $ reduce T = F
+  => $ 0                               |    "*" ID $ shift T to 2
+  => $ 0 2{[E = T . ] [T = T . "*" F]} |    "*" ID $ shift "*" to 7
+  => $ 0 2 7{[T = T "*" . F]}          |        ID $ shift ID to 5
+  => $ 0 2 7 5{[F = ID .]}             |           $ reduce F = ID
+  => $ 0 2 7                           |           $ shift F to 10
+  => $ 0 2 7 10{[T = T "*" F .]}       |           $ reduce T = T "*" F
+  => $ 0                               |           $ shift T to 2
+  => $ 0 2{[E = T . ] [T = T . "*" F]} |           $ reduce E = T
+  => $ 0                               |           $ shift E to 1
+  => $ 0 1{[S = E . ][E = E . "+" T]}  |           $ accept
+  
+
+algorithm
+
+SetOfItems Goto(I, X) {
+  J := {};
+  for(each [A = a . X b] in I)
+    J := Add([A = a X . b], J);
+  return Closure(J);
+}
+
+Void Items(G) {
+  C := {Closure({[Sp = . S]})};
+  repeat
+    for(each I in C)
+      for(each X in G) {
+        if(Not(Goto(I, X)) and Not(In(J, C)))
+          C := Add(Goto(I, X), C);
+      }
+  until Not(Changed(C));
+}
+  
+  

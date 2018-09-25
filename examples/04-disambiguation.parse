@@ -1,0 +1,86 @@
+grammar
+  productions
+    E.A = E "+" E {left}
+    E.T = E "*" E {left}
+    E.M = "-" E
+    E.B = "(" E ")"
+    E.V = ID
+  priorities
+    E.M > E. T > E.A
+    
+derivation
+  E =>* ID "*" ID "+" ID
+  
+term derivation
+  E 
+  => A(E, E)
+  => A(T(E, E), E)
+  => A(T(E, E), E)
+  => A(T(V(ID), E), E)
+  => A(T(V(ID), V(ID)), E)
+  => A(T(V(ID), V(ID)), V(ID))
+  
+term derivation
+  E 
+  => T(E, E)
+  => T(E, E)
+  => T(V(ID), E)
+  => T(V(ID), A(E, E))
+  => T(V(ID), A(V(ID), E))
+  => T(V(ID), A(V(ID), V(ID)))
+  
+derivation
+  E =>* "-" ID "*" ID "+" ID
+  
+term derivation
+  E 
+  => A(E, E)
+  => A(T(E, E), E)
+  => A(T(M(E), E), E)
+  => A(T(M(V(ID), E), E))
+  => A(T(M(V(ID), V(ID)), E))
+  => A(T(M(V(ID), V(ID)), V(ID)))
+  
+term derivation
+  E 
+  => T(E, E)
+  => T(M(E), E)
+  => T(M(V(ID)), E)
+  => T(M(V(ID)), A(E, E))
+  => T(M(V(ID)), A(V(ID), E))
+  => T(M(V(ID)), A(V(ID), V(ID)))
+  
+// other derivations
+  
+grammar 
+  productions
+    E.A = E "+" T
+    E   = T
+    T.T = T "*" F
+    T   = F
+    F.V = ID
+    F.B = "(" E ")"
+    
+term derivation
+  E
+  => A(E, T)
+  => A(T, T)
+  => A(T(T, F), T)
+  => A(T(F, F), T)
+  => A(T(V(ID), F), T)
+  => A(T(V(ID), V(ID)), T)
+  => A(T(V(ID), V(ID)), F)
+  => A(T(V(ID), V(ID)), V(ID))
+  
+term derivation
+  E
+  => A(E, T)
+  => A(T, T)
+  => A(T(T, F), T)
+  => A(T(F, F), T)
+  => A(T(M(F), F), T)
+  => A(T(M(V(ID)), F, T))
+  => A(T(M(V(ID)), V(ID)), T)
+  => A(T(M(V(ID)), V(ID)), F)
+  => A(T(M(V(ID)), V(ID)), V(ID))
+  

@@ -1,0 +1,117 @@
+// notation:
+
+// A, B, C: non-terminals
+// l: terminals
+// a, b, c: strings of non-terminals and terminals (alpha, beta, gamma in math)
+// w, v: strings of terminal symbols
+
+grammar // 4.7
+  sorts E ID
+  productions
+    E = E "+" E
+    E = E "*" E
+    E = "-" E
+    E = "(" E ")"
+    E = ID
+    
+// derivation step: replace symbol by rhs of production
+// E = E "+" E
+// replace E by E "+" E
+//
+// derivation:
+// repeatedly apply derivations
+
+derivation
+  E 
+  => "-" E
+  => "-" "(" E ")"
+  => "-" "(" ID ")"
+    
+derivation // derives in zero or more steps
+  E =>* "-" "(" ID "+" ID ")"
+  
+derivation // left-most derivation
+  E 
+  => "-" E
+  => "-" "(" E ")"
+  => "-" "(" E "+" E ")"
+  => "-" "(" ID "+" E ")"
+  => "-" "(" ID "+" ID ")"
+  
+// expand left-most non-terminal 
+  
+derivation // right-most derivation
+  E 
+  => "-" E
+  => "-" "(" E ")"
+  => "-" "(" E "+" E ")"
+  => "-" "(" E "+" ID ")"
+  => "-" "(" ID "+" ID ")"
+  
+// expand right-most non-terminal 
+
+// parse tree is graphical representation of a derivation
+// that filters out the order
+
+grammar // 4.7 
+  sorts E ID
+  productions
+    E.A = E "+" E
+    E.T = E "*" E
+    E.N = "-" E
+    E.P = "(" E ")"
+    E.V = ID
+    
+tree derivation // left-most
+  E 
+  => E["-" E]
+  => E["-" E["(" E ")"]]
+  => E["-" E["(" E[E "+" E] ")"]]
+  => E["-" E["(" E[E[ID] "+" E] ")"]]
+  => E["-" E["(" E[E[ID] "+" E[ID]] ")"]]
+    
+// ambiguity
+
+derivation
+  E =>* ID "+" ID "*" ID
+
+// two distinct left-most derivations
+
+derivation
+  E
+  => E "+" E
+  => ID "+" E
+  => ID "+" E "*" E
+  => ID "+" ID "*" E
+  => ID "+" ID "*" ID
+  
+tree derivation
+  E =>* E[E[ID] "+" E[E[ID] "*" E[ID]]]
+  
+derivation
+  E
+  => E "*" E
+  => E "+" E "*" E
+  => ID "+" E "*" E
+  => ID "+" ID "*" E
+  => ID "+" ID "*" ID
+  
+tree derivation
+  E =>* E[E[E[ID] "+" E[ID]] "*" E[ID]]
+  
+term derivation
+  E 
+  => A(E, E)
+  => A(ID, E)
+  => A(ID, T(E, E))
+  => A(ID, T(ID, E))
+  => A(ID, T(ID, ID))
+  
+term derivation
+  E
+  => T(E, E)
+  => T(A(E, E), E)
+  => T(A(ID, E), E)
+  => T(A(ID, ID), E)
+  => T(A(ID, ID), ID)
+  

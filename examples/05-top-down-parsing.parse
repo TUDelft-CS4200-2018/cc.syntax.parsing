@@ -1,0 +1,38 @@
+// top-down parsing
+
+grammar // 4.2
+  sorts E T E' F T'
+  productions 
+    E  = T E'       // 1
+    E' = "+" T E'   // 2
+    E' =            // 3
+    T  = F T'       // 4
+    T' = "*" F T'   // 5
+    T' =            // 6
+    F  = "(" E ")"  // 7
+    F  = ID         // 8
+    
+// top-down parsing:
+//
+// - start with start symbol
+// - predict which production to apply
+
+derivation
+  E =>* ID "+" ID "*" ID 
+   
+tree derivation // top-down parse
+  E 
+  => E[T E'] // 1
+  => E[T[F T'] E'] // 4
+  => E[T[F[ID] T'] E'] // 8; next = ID
+  => E[T[F[ID] T'[]] E'] // 6; next != "*"
+  => E[T[F[ID] T'[]] E'["+" T E']] // 2; next = "+"
+  => E[T[F[ID] T'[]] E'["+" T[F T'] E']]
+  => E[T[F[ID] T'[]] E'["+" T[F[ID] T'] E']]
+  => E[T[F[ID] T'[]] E'["+" T[F[ID] T'["*" F T']] E']]
+  => E[T[F[ID] T'[]] E'["+" T[F[ID] T'["*" F[ID] T']] E']]
+  => E[T[F[ID] T'[]] E'["+" T[F[ID] T'["*" F[ID] T'[]]] E']]
+  => E[T[F[ID] T'[]] E'["+" T[F[ID] T'["*" F[ID] T'[]]] E'[]]] 
+  
+// decide on production to choose based on next input symbol
+
