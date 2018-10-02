@@ -1,0 +1,10 @@
+grammar
+  productions
+    E.I = ID
+    E.B = E B E
+    B.P = "+"
+    B.S = "-"
+    B.M = "*"
+    B.D = "/"
+    
+    

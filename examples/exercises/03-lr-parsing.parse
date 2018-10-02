@@ -1,0 +1,8 @@
+grammar
+  start S
+  non-terminals S E 
+  productions
+    S.S   = E $
+    E.If  = "if" E "then" E
+    E.IfE = "if" E "then" E "else" E
+    E.Var = ID
